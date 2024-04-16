@@ -16,9 +16,9 @@ import tiktoken
 # pip install langchain streamlit langchain-openai python-dotenv
 # Zuweisung der Secrets direkt aus st.secrets
 os.environ["OPENAI_API_KEY"] = st.secrets['openai_api_key']
-qdrant_api_key = st.secrets("qdrant_api_key")
-qdrant_url = st.secrets("qdrant_url")
-qdrant_collection_name = st.secrets("qdrant_collection_name")
+qdrant_api_key = st.secrets["qdrant_api_key"]
+qdrant_url = st.secrets["qdrant_url"]
+qdrant_collection_name = st.secrets["qdrant_collection_name"]
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
