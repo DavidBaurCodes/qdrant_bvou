@@ -1,5 +1,3 @@
-# Notiz: Aktuell noch nicht fertig, Bitte noch Sidebar konfigurieren und annotieren.
-
 import streamlit as st
 from dotenv import load_dotenv
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
@@ -104,20 +102,19 @@ def get_response(query, chat_history):
 def extract_context_and_metadata(response):
     context = response.get('context', [])
     chat_history = response.get('chat_history', [])
-    combined_text = concatenate_text_lists(chat_history, [doc.page_content for doc in context])
+    combined_text = concatenate_text_lists(chat_history, [doc.content for doc in context])  # Verwende doc.content
     metadata = [doc.metadata for doc in context]
-    page_content = [doc.page_content for doc in context]
-    return combined_text, metadata, page_content
-
+    content = [doc.content for doc in context]  # Verwende doc.content
+    return combined_text, metadata, content
 
 def get_source_info(metadata):
     return metadata.get('url', metadata.get('name', 'Unbekannte Quelle'))
 
 def show_document_info(doc_info):
     try:
-        if "page_content" in doc_info:
+        if "content" in doc_info:  # Verwende content anstelle von page_content
             with st.expander("Inhalt"):
-                st.markdown(doc_info["page_content"])
+                st.markdown(doc_info["content"])
         else:
             st.write(doc_info)
     except KeyError as e:
@@ -168,21 +165,19 @@ if "full_responses" in st.session_state:
         query = response_with_query["query"]
         response = response_with_query["response"]
 
-        combined_text, metadata, page_content = extract_context_and_metadata(response)
+        combined_text, metadata, content = extract_context_and_metadata(response)  # Verwende content
         total_token_length += tokenize_text(combined_text)
 
         with st.sidebar.expander(f"Kontext: {query}", expanded=True):
             for doc_info in metadata:
                 show_document_info(doc_info)
-            for doc_info in page_content:
+            for doc_info in content:  # Verwende content
                 show_document_info(doc_info)
- 
 
         # Sammle Quelleninformationen
         for doc_metadata in metadata:
             source_info = get_source_info(doc_metadata)
             all_sources_info.append(source_info)
- 
 
     # Anzeige der Gesamttokenanzahl
     st.write("Tokens:", total_token_length)
