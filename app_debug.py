@@ -25,8 +25,8 @@ if "retrieved_docs" not in st.session_state:
     st.session_state.retrieved_docs = []
 
 # Konfigurieren der Streamlit-Seite
-st.set_page_config(page_title="RAG - BVOU", page_icon="🔗", layout="wide")
-st.title("BVOU Bot - QDRANT")
+st.set_page_config(page_title="Orthinform Chatbot", page_icon="🔗", layout="wide")
+st.title("Orthinform - Chatbot")
 
 # Initialisieren der Embeddings und des Qdrant-Clients
 embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
@@ -166,7 +166,7 @@ if user_query is not None and user_query != "":
     st.session_state.retrieved_docs[-1]["tokens"] = total_tokens
 
 # Anzeigen der abgerufenen Dokumente in Expandern in der Seitenleiste
-st.sidebar.title("Retrieved Documents")
+st.sidebar.title("Metadaten - Tokens")
 if st.session_state.retrieved_docs:
     for entry in st.session_state.retrieved_docs:
         query = entry["query"]
