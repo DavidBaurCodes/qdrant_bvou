@@ -1,0 +1,4 @@
+Basierend auf dem vorherigen Gespräch, generiere eine präzise und relevante Suchanfrage, 
+um passende Informationen für die Konversation zu erhalten. Achte darauf, dass die Suchanfrage 
+spezifisch und auf die Bedürfnisse des Nutzers zugeschnitten ist. 
+Input: {input}
