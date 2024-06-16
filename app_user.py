@@ -9,7 +9,11 @@ from qdrant_client import QdrantClient
 import os
 import toml
 
-
+# Zuweisung der Secrets direkt aus st.secrets
+os.environ["OPENAI_API_KEY"] = st.secrets['openai_api_key']
+qdrant_api_key = st.secrets["qdrant_api_key"]
+qdrant_url = st.secrets["qdrant_url"]
+qdrant_collection_name = st.secrets["qdrant_collection_name"]
 
 # Initialisieren des Chatverlaufs und der abgerufenen Dokumente im Sitzungsstatus, falls nicht vorhanden
 if "chat_history" not in st.session_state:
