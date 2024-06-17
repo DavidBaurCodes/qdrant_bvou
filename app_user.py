@@ -45,6 +45,7 @@ def get_context_retriever_chain(vectorstore, k=5):
 
     search_prompt_template = ChatPromptTemplate.from_messages([
         MessagesPlaceholder(variable_name="chat_history"),
+        ("user", "{input}"),
         ("user", search_prompt)
     ])
 
