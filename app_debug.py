@@ -157,7 +157,7 @@ if user_query is not None and user_query != "":
     # URLs in den Metadaten prüfen und am Ende der AI-Nachricht anzeigen
     urls = get_urls_from_metadata(documents)
     if urls:
-        links_content = "<p style='font-size: medium;'>Links für weitere Informationen:</p>"
+        links_content = "<p style='font-size: medium;'>Links für weitere Informationen und Expertenempfehlungen in Ihrer Nähe:</p>"
         for url in urls:
             links_content += f"<p style='font-size: small;'>- <a href='{url}' target='_blank'>{url}</a></p>"
         st.markdown(links_content, unsafe_allow_html=True)
