@@ -25,6 +25,30 @@ if "retrieved_docs" not in st.session_state:
 st.set_page_config(page_title="Orthinform - Chatbot", page_icon="🔗", layout="wide")
 st.title("Orthinform - Chatbot")
 
+# CSS for styling
+st.markdown("""
+    <style>
+    .chat-container {
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    .stTextInput > div > input {
+        border-color: #FF6347; /* Reddish color */
+        background-color: #FFE4E1; /* Light reddish background */
+        color: black;
+        text-align: center;
+    }
+    .stTextInput > div > input:focus {
+        border-color: #FF4500; /* Darker red when focused */
+        background-color: #FF6347; /* Darker background when focused */
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # Initialisieren der Embeddings und des Qdrant-Clients
 embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
 client = QdrantClient(qdrant_url, api_key=qdrant_api_key)
@@ -102,13 +126,16 @@ def get_urls_from_metadata(documents):
     return list(set(valid_urls))
 
 # Anzeigen der Konversation im Hauptfenster
-for message in st.session_state.chat_history:
-    if isinstance(message, HumanMessage):
-        with st.chat_message("Human"):
-            st.markdown(message.content)
-    else:
-        with st.chat_message("AI"):
-            st.markdown(message.content)
+with st.container():
+    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+    for message in st.session_state.chat_history:
+        if isinstance(message, HumanMessage):
+            with st.chat_message("Human"):
+                st.markdown(message.content)
+        else:
+            with st.chat_message("AI"):
+                st.markdown(message.content)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Benutzereingabe für die Frage
 user_query = st.chat_input("Deine Frage")
