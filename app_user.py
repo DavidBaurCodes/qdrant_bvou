@@ -22,8 +22,44 @@ if "retrieved_docs" not in st.session_state:
     st.session_state.retrieved_docs = []
 
 # Konfigurieren der Streamlit-Seite
-st.set_page_config(page_title="RAG - BVOU", page_icon="🔗", layout="wide")
-st.title("BVOU Bot - QDRANT")
+st.set_page_config(page_title="Orthinform - Chatbot", page_icon="🔗", layout="wide")
+
+# Add custom CSS for input field styling and scroll bar
+st.markdown("""
+<style>
+    .stTextInput > div > div > input {
+        background-color: #f0f2f6;
+        border: 2px solid #4e8cff;
+        border-radius: 5px;
+        padding: 10px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .stTextInput {
+        display: flex;
+        justify-content: center;
+    }
+    .main-content {
+        height: 600px;
+        overflow-y: auto;
+        padding-right: 20px;
+    }
+    .main-content::-webkit-scrollbar {
+        width: 10px;
+    }
+    .main-content::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    .main-content::-webkit-scrollbar-thumb {
+        background: #888;
+    }
+    .main-content::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.title("Orthinform - Chatbot")
 
 # Initialisieren der Embeddings und des Qdrant-Clients
 embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
@@ -101,38 +137,50 @@ def get_urls_from_metadata(documents):
     valid_urls = [url for url in urls if url and url.lower() not in ["", "n/a"] and len(url) >= 5]
     return list(set(valid_urls))
 
-# Anzeigen der Konversation im Hauptfenster
-for message in st.session_state.chat_history:
-    if isinstance(message, HumanMessage):
-        with st.chat_message("Human"):
-            st.markdown(message.content)
-    else:
-        with st.chat_message("AI"):
-            st.markdown(message.content)
+# Wrap the main content in a container with the 'main-content' class
+main_content = st.container()
+
+with main_content:
+    st.markdown('<div class="main-content">', unsafe_allow_html=True)
+    
+    # Anzeigen der Konversation im Hauptfenster
+    for message in st.session_state.chat_history:
+        if isinstance(message, HumanMessage):
+            with st.chat_message("Human"):
+                st.markdown(message.content)
+        else:
+            with st.chat_message("AI"):
+                st.markdown(message.content)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Benutzereingabe für die Frage
-user_query = st.chat_input("Deine Frage")
+user_query = st.text_input("Deine Frage", key="user_input")
 if user_query is not None and user_query != "":
     st.session_state.chat_history.append(HumanMessage(content=user_query))
-    with st.chat_message("Human"):
-        st.markdown(user_query)
+    with main_content:
+        st.markdown('<div class="main-content">', unsafe_allow_html=True)
+        with st.chat_message("Human"):
+            st.markdown(user_query)
 
-    # Verwenden des Generators für die KI-Antwort
-    ai_response_content = ""
-    documents = None
-    with st.chat_message("AI"):
-        ai_response_generator = get_response_and_documents(user_query, st.session_state.chat_history)
-        for response in st.write_stream(ai_response_generator):
-            ai_response_content += response  # Sammeln des gesamten AI-Responses
-    
-    # Abrufen der vollständigen Dokumente
-    documents = st.session_state.retrieved_docs[-1]["documents"]
-    st.session_state.chat_history.append(AIMessage(content=ai_response_content))
+        # Verwenden des Generators für die KI-Antwort
+        ai_response_content = ""
+        documents = None
+        with st.chat_message("AI"):
+            ai_response_generator = get_response_and_documents(user_query, st.session_state.chat_history)
+            for response in st.write_stream(ai_response_generator):
+                ai_response_content += response  # Sammeln des gesamten AI-Responses
+        
+        # Abrufen der vollständigen Dokumente
+        documents = st.session_state.retrieved_docs[-1]["documents"]
+        st.session_state.chat_history.append(AIMessage(content=ai_response_content))
 
-    # URLs in den Metadaten prüfen und am Ende der AI-Nachricht anzeigen
-    urls = get_urls_from_metadata(documents)
-    if urls:
-        links_content = "<p style='font-size: medium;'>Links für weitere Informationen:</p>"
-        for url in urls:
-            links_content += f"<p style='font-size: small;'>- <a href='{url}' target='_blank'>{url}</a></p>"
-        st.markdown(links_content, unsafe_allow_html=True)
+        # URLs in den Metadaten prüfen und am Ende der AI-Nachricht anzeigen
+        urls = get_urls_from_metadata(documents)
+        if urls:
+            links_content = "<p style='font-size: medium;'>Links für weitere Informationen:</p>"
+            for url in urls:
+                links_content += f"<p style='font-size: small;'>- <a href='{url}' target='_blank'>{url}</a></p>"
+            st.markdown(links_content, unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
