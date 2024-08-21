@@ -101,38 +101,50 @@ def get_urls_from_metadata(documents):
     valid_urls = [url for url in urls if url and url.lower() not in ["", "n/a"] and len(url) >= 5]
     return list(set(valid_urls))
 
+# Create a container for the chat history
+chat_container = st.container()
+
+# Create columns for centering the input field
+col1, col2, col3 = st.columns([1, 2, 1])
+
+# Benutzereingabe für die Frage (zentriert)
+with col2:
+    user_query = st.text_input("Deine Frage")
+
 # Anzeigen der Konversation im Hauptfenster
-for message in st.session_state.chat_history:
-    if isinstance(message, HumanMessage):
-        with st.chat_message("Human"):
-            st.markdown(message.content)
-    else:
-        with st.chat_message("AI"):
-            st.markdown(message.content)
+with chat_container:
+    for message in st.session_state.chat_history:
+        if isinstance(message, HumanMessage):
+            with st.chat_message("Human"):
+                st.markdown(message.content)
+        else:
+            with st.chat_message("AI"):
+                st.markdown(message.content)
 
-# Benutzereingabe für die Frage
-user_query = st.chat_input("Deine Frage")
-if user_query is not None and user_query != "":
+if user_query:
     st.session_state.chat_history.append(HumanMessage(content=user_query))
-    with st.chat_message("Human"):
-        st.markdown(user_query)
+    with chat_container:
+        with st.chat_message("Human"):
+            st.markdown(user_query)
 
-    # Verwenden des Generators für die KI-Antwort
-    ai_response_content = ""
-    documents = None
-    with st.chat_message("AI"):
-        ai_response_generator = get_response_and_documents(user_query, st.session_state.chat_history)
-        for response in st.write_stream(ai_response_generator):
-            ai_response_content += response  # Sammeln des gesamten AI-Responses
+        # Verwenden des Generators für die KI-Antwort
+        ai_response_content = ""
+        documents = None
+        with st.chat_message("AI"):
+            ai_response_generator = get_response_and_documents(user_query, st.session_state.chat_history)
+            for response in st.write_stream(ai_response_generator):
+                ai_response_content += response  # Sammeln des gesamten AI-Responses
     
-    # Abrufen der vollständigen Dokumente
-    documents = st.session_state.retrieved_docs[-1]["documents"]
-    st.session_state.chat_history.append(AIMessage(content=ai_response_content))
+        # Abrufen der vollständigen Dokumente
+        documents = st.session_state.retrieved_docs[-1]["documents"]
+        st.session_state.chat_history.append(AIMessage(content=ai_response_content))
 
-    # URLs in den Metadaten prüfen und am Ende der AI-Nachricht anzeigen
-    urls = get_urls_from_metadata(documents)
-    if urls:
-        links_content = "<p style='font-size: medium;'>Links für weitere Informationen:</p>"
-        for url in urls:
-            links_content += f"<p style='font-size: small;'>- <a href='{url}' target='_blank'>{url}</a></p>"
-        st.markdown(links_content, unsafe_allow_html=True)
+        # URLs in den Metadaten prüfen und am Ende der AI-Nachricht anzeigen
+        urls = get_urls_from_metadata(documents)
+        if urls:
+            st.markdown("Links für weitere Informationen:")
+            for url in urls:
+                st.markdown(f"- [{url}]({url})")
+
+# Scroll to the bottom of the chat
+st.experimental_rerun()
